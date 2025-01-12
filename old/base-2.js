@@ -98,31 +98,6 @@ function ddot(keypoints, color){
 }
 
 
-
-// Mouvement
-function dmove(hand){
-  let center;
-
-  // Si c'est un pouce levé
-  if (thumb(hand)) {
-    center = "👍";
-  }
-  else if (thumb_down(hand)) {
-    center = "👎";
-  }
-  else if (ok(hand)) {
-    center = "👌";
-  }
-  else if (doigt(hand)) {
-    center = "🖕"
-  } else {
-    center = "rien";
-  }
- 
-  return center;
-
-}
-
 function dhand(hand){
   // Rouge si la main est gauche, bleu si la main est droite
   let color = hand.handedness == "Left" ? [255, 0, 0] : [0, 0, 255];
@@ -131,31 +106,12 @@ function dhand(hand){
   if (hand.confidence > 0.1) {
 
     ddot(hand.keypoints, color);
+
+    // On dessine les lignes entre les points
     dline(hand.keypoints, color);
-
-
   }
-}
 
-// Écart entre le bout du pouce et le bout de l'index
-function distance_thumb_index(hand){
-  let thumb = hand.keypoints.find(k => k.name == "thumb_tip");
-  let index = hand.keypoints.find(k => k.name == "index_finger_tip");
-
-  return dist(thumb.x, thumb.y, index.x, index.y);
-}
-
-// Fonction qui vérifie si le pouce est levé
-function thumb_up_all(hand){
-  // Si le bout du pouce est plus haut que tout les autres points
-  let thumb = hand.keypoints.find(k => k.name == "thumb_tip");
-  let others = hand.keypoints.filter(k => k.name != "thumb_tip");
-  for (let other of others) {
-    if (thumb.y < other.y) {
-      return false;
-    }
-  }
-  return true;
+  
 }
 
 // On écrit le texte
@@ -166,12 +122,16 @@ function dtext(){
   }
   else {
     for (let hand of hands) {
-      t += hand.handedness + " mouvement : " + dmove(hand) + "\n";
+      t += hand.handedness + " confidence: " + hand.confidence + "\n";
     }
   }
 
-  // On modifie le contenu de la balise label
-  document.getElementById("label").innerText = t;
+
+
+  textSize(15);
+  fill(50, 50, 50); // Changed color to a dark gray
+  textAlign(LEFT, BOTTOM);
+  text(t, 10, height - 10);
 }
 
 // On dessine dans le canva
@@ -181,6 +141,7 @@ function draw(){
   // On met la vidéo dans le fond du canva
   // image(video, 0, 0);
   
+
   // Si on voit une main
   if (hands.length > 0) {
     
@@ -191,5 +152,4 @@ function draw(){
     }
   }
   dtext();
-
 }
